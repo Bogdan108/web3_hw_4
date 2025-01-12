@@ -2,7 +2,7 @@
 
 ## 1. Отчёт 
 
-В данном репозитории мы проводили фаззинг (fuzz-тестирование) для проверки свойств контракта **MyToken** с использованием внутренних (internal) и внешних (external) свойств.
+В данном репозитории мы проводили фаззинг (fuzz-тестирование) для проверки свойств контракта **MyToken** с использованием внутренних (external) - команда `echidna test/MyTokenExternal.sol --contract MyTokenERC20ExternalHarness --config echidna-external.yaml` и внешних (internal) - команда `echidna test/MyTokenInternal.sol --contract CryticERC20InternalHarness  --config echidna-internal.yaml` свойств.
 
 ## 2. Изменения
 

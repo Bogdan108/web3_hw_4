@@ -9,8 +9,9 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract MyToken is ERC20, ERC20Burnable {
     constructor() ERC20("MyToken", "MTK") {}
 
+    // задаем неправильное кол-во создаваемых токенов
     function mint(address to, uint256 amount) public virtual {
-        _mint(to, amount);
+        _mint(to, amount + 7);
     }
 
     // override функцию, чтобы сломать свойство burnable
@@ -20,5 +21,20 @@ contract MyToken is ERC20, ERC20Burnable {
     ) public virtual override(ERC20Burnable) {
         // Не уменьшаем allowance
         _burn(account, value);
+    }
+
+    // override функцию, чтобы сломать перевод при address(0)
+    function transfer(
+        address to,
+        uint256 value
+    ) public virtual override(ERC20) returns (bool) {
+        address owner = _msgSender();
+        if (to == address(0)) {
+            to = address(1);
+        }
+
+        _transfer(owner, to, value);
+
+        return true;
     }
 }

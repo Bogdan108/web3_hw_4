@@ -1,66 +1,53 @@
-## Foundry
+# Отчёт по фазз-тестированию MyToken
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+## 1. Отчёт 
 
-Foundry consists of:
+В данном репозитории мы проводили фаззинг (fuzz-тестирование) для проверки свойств контракта **MyToken** с использованием внутренних (internal) и внешних (external) свойств.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## 2. Изменения
 
-## Documentation
+### 2.1. Перечень внесённых изменений в код
 
-https://book.getfoundry.sh/
+1. **mint**  
+   ```solidity
+   function mint(address to, uint256 amount) public virtual {
+       _mint(to, amount + 7);
+   }
+   ```
+Добавляем +7 к amount, тем самым нарушаем корректность выпуска новых токенов.
 
-## Usage
+Ожидалось, что _mint будет вызван с исходным amount, но фактически минтится на 7 больше.
 
-### Build
+2. **burnFrom**  
+   ```solidity
+   function burnFrom(address account, uint256 value)
+    public
+    virtual
+    override(ERC20Burnable) {
+    // Не уменьшаем allowance
+    _burn(account, value);
+    }
+   ```
+Здесь намеренно не учитываем и не уменьшаем allowance.
 
-```shell
-$ forge build
-```
+Любой может вызвать burnFrom без корректного разрешения, ломая логику, согласно которой при burnFrom надо проверять, что allowance[account][msg.sender] >= value.
 
-### Test
+3. **transfer**  
+   ```solidity
+   function transfer(address to, uint256 value)
+    public
+    virtual
+    override(ERC20)
+    returns (bool){
+    address owner = _msgSender();
+    if (to == address(0)) {
+        to = address(1);
+    }
+    _transfer(owner, to, value);
+    return true;
+    }
+    ```
+Если указан нулевой адрес (0x0) для to, мы перенаправляем перевод на address(1) вместо revert.
 
-```shell
-$ forge test
-```
+Тем самым допускаем «псевдо-перевод» на запрещённый адрес, что ломает свойство корректной проверки to != address(0).
 
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```

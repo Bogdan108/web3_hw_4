@@ -34,4 +34,11 @@ contract CryticERC20InternalHarness is
     ) public virtual override(MyToken, ERC20Burnable) {
         super.burnFrom(account, value);
     }
+
+    function transfer(
+        address to,
+        uint256 value
+    ) public virtual override(ERC20, MyToken) returns (bool) {
+        return super.transfer(to, value);
+    }
 }

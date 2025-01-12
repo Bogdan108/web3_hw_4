@@ -12,11 +12,10 @@ contract CryticERC20InternalHarness is
     CryticERC20MintableProperties
 {
     constructor() {
-        // Setup balances for USER1, USER2 and USER3:
         _mint(USER1, INITIAL_BALANCE);
         _mint(USER2, INITIAL_BALANCE);
         _mint(USER3, INITIAL_BALANCE);
-        // Setup total supply:
+
         initialSupply = totalSupply();
         isMintableOrBurnable = true;
     }
@@ -26,5 +25,13 @@ contract CryticERC20InternalHarness is
         uint256 amount
     ) public virtual override(MyToken, CryticERC20MintableProperties) {
         super.mint(to, amount);
+    }
+
+    // override функцию, чтобы сломать свойство burnable
+    function burnFrom(
+        address account,
+        uint256 value
+    ) public virtual override(MyToken, ERC20Burnable) {
+        super.burnFrom(account, value);
     }
 }

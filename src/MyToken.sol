@@ -12,4 +12,13 @@ contract MyToken is ERC20, ERC20Burnable {
     function mint(address to, uint256 amount) public virtual {
         _mint(to, amount);
     }
+
+    // override функцию, чтобы сломать свойство burnable
+    function burnFrom(
+        address account,
+        uint256 value
+    ) public virtual override(ERC20Burnable) {
+        // Не уменьшаем allowance
+        _burn(account, value);
+    }
 }
